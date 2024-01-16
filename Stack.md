@@ -9,7 +9,7 @@
 攻击者将恶意代码注入程序的内存空间中，并通过改写返回地址或函数指针来执行这段恶意代码。
 ## 执行恶意代码
 控制流被劫持，程序执行流将跳转到攻击者注入的代码处执行，(提升权限、泄露信息或者破坏系统)
-
+  
 ## 堆栈保护机制
 如GCC的SSP，在函数调用时保护返回地址和其他关键的栈数据。
 ## 非可执行空间（NX bit DEP）
@@ -18,13 +18,16 @@
 通过随机化内存中程序组件的地址，使得攻击者难以预测目标地址，进而难以成功利用溢出漏洞。
 
 
-举例  把死循环代码存到数组后覆盖其重要信息
+举例  把死循环代码存到数组后覆盖其重要信息   
+
 #include<stdio.h>  
+
 void shellcode( void )  
 {  
 	while( 1 )  
 	    puts("virus run success !");  //死循环  
 }  
+
 void target( void )  
 {  
     int  a[ 4 ];   
@@ -34,12 +37,14 @@ void target( void )
     // 栈上数组a之后的内存可能是函数的返回地址或其他重要的栈帧信息  
     puts("target");  
 }  
+
 int main(void)  
 {  
     target( );  
     puts("main\n"); // 如果越界写入修改了返回地址，语句永远不会执行
     return 0;  
 }  
+
 
 绕过 GCC 随机数防御机制    
 void TarGet( void )    
@@ -67,7 +72,6 @@ void TarGet( void )
 
 # PIE（ASLR）（地址空间分布随机化） 
 让程序能装载在随机的地址，从而缓解缓冲区溢出攻击(将程序编译成位置无关，并链接为ELF共享对象)
-
 sudo -s 
 echo 2 > /proc/sys/kernel/randomize_va_space
 -no-pie / -pie (关闭 / 开启) 
