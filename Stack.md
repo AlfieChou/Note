@@ -10,12 +10,25 @@
 ## 执行恶意代码
 控制流被劫持，程序执行流将跳转到攻击者注入的代码处执行，(提升权限、泄露信息或者破坏系统)
   
-## 堆栈保护机制
-如GCC的SSP，在函数调用时保护返回地址和其他关键的栈数据。
-## 非可执行空间（NX bit DEP）
-使得栈、堆和其他数据区域不可执行，防止攻击者在这些区域中执行任何代码。
-## 地址空间布局随机化（ASLR）
-通过随机化内存中程序组件的地址，使得攻击者难以预测目标地址，进而难以成功利用溢出漏洞。
+# 栈保护机制
+## Stack Canary 栈保护  
+函数的入口处，先从fs/gs寄存器中取出一个4字节(eax)或者8字节(rax)的值存到栈上，当函数结束时会检查这个栈上的值是否和存进去的值一致。
+
+-fstack-protector 启用保护，不过只为局部变量中含有数组的函数插入保护
+-fstack-protector-all 启用保护，为所有函数插入保护
+-fstack-protector-strong
+-fstack-protector-explicit 只对有明确stack_protect attribute的函数开启保护
+-fno-stack-protector 禁用保护.
+
+## NX（DEP）（堆栈不可执行）  
+将数据所在内存页标识为不可执行，当程序溢出成功转入shellcode时，程序会尝试在数据页面上执行指令，此时CPU就会抛出异常，而不是去执行恶意指令。
+-z execstack / -z noexecstack (关闭 / 开启)
+
+## PIE（ASLR）（地址空间分布随机化） 
+让程序能装载在随机的地址，从而缓解缓冲区溢出攻击(将程序编译成位置无关，并链接为ELF共享对象)
+sudo -s 
+echo 2 > /proc/sys/kernel/randomize_va_space
+-no-pie / -pie (关闭 / 开启) 
 
 
 举例  把死循环代码存到数组后覆盖其重要信息   
@@ -55,23 +68,3 @@ void TarGet( void )
     printf("TarGet\n");       
     a[4] = rand;           // 将之前读取到的值恢复到数组a的第五个元素，   
 }    
-
-
-# Stack Canary 栈保护  
-函数的入口处，先从fs/gs寄存器中取出一个4字节(eax)或者8字节(rax)的值存到栈上，当函数结束时会检查这个栈上的值是否和存进去的值一致。
-
--fstack-protector 启用保护，不过只为局部变量中含有数组的函数插入保护
--fstack-protector-all 启用保护，为所有函数插入保护
--fstack-protector-strong
--fstack-protector-explicit 只对有明确stack_protect attribute的函数开启保护
--fno-stack-protector 禁用保护.
-
-# NX（DEP）（堆栈不可执行）  
-将数据所在内存页标识为不可执行，当程序溢出成功转入shellcode时，程序会尝试在数据页面上执行指令，此时CPU就会抛出异常，而不是去执行恶意指令。
--z execstack / -z noexecstack (关闭 / 开启)
-
-# PIE（ASLR）（地址空间分布随机化） 
-让程序能装载在随机的地址，从而缓解缓冲区溢出攻击(将程序编译成位置无关，并链接为ELF共享对象)
-sudo -s 
-echo 2 > /proc/sys/kernel/randomize_va_space
--no-pie / -pie (关闭 / 开启) 
