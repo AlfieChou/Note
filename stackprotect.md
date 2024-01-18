@@ -1,4 +1,4 @@
-# canary  随机值
+# canary  随机值  
 gcc -fno-stack-protector/-fstack-protector -o canary canary.c  
 echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
   
